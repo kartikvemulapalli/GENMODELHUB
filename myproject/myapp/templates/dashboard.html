@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENAI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #0f0c29;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Gradient Effect */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+            padding: 20px;
+        }
+
+        /* Logo/Heading */
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 4.5em;
+            background: linear-gradient(to right, #fff, #a3a2f5, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 6px;
+            margin-bottom: 60px;
+            margin-top: -30px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Dynamic 3D Mesh Background */
+        .mesh-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        /* Particle Effects */
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Glowing Orbs */
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.4;
+            animation: floatAround 20s infinite linear alternate, pulse 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .glow-purple {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent 70%);
+        }
+
+        .glow-blue {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(64, 86, 161, 0.4), transparent 70%);
+        }
+
+        .glow-teal {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(0, 128, 128, 0.3), transparent 70%);
+        }
+
+        /* Button Container */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 30px;
+            position: relative;
+        }
+
+        /* Main Navigation Buttons */
+        .button {
+            padding: 20px 50px;
+            font-size: 1.4em;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out forwards 0.7s;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.1) 20%, 
+                rgba(255, 255, 255, 0.2) 40%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                rgba(255, 255, 255, 0.2) 60%, 
+                rgba(255, 255, 255, 0.1) 80%, 
+                rgba(255, 255, 255, 0) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.8s;
+        }
+
+        .button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.3);
+            letter-spacing: 1.5px;
+        }
+
+        .button:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Voice Button Custom Styling */
+        .button:nth-child(1) {
+            background: linear-gradient(45deg, rgba(147, 88, 247, 0.2), rgba(125, 89, 252, 0.2));
+            border: 1px solid rgba(147, 88, 247, 0.3);
+        }
+
+        .button:nth-child(1):hover {
+            background: linear-gradient(45deg, rgba(147, 88, 247, 0.3), rgba(125, 89, 252, 0.3));
+            border: 1px solid rgba(147, 88, 247, 0.5);
+        }
+
+        /* Chatbot Button Custom Styling */
+        .button:nth-child(2) {
+            background: linear-gradient(45deg, rgba(80, 250, 123, 0.2), rgba(0, 223, 216, 0.2));
+            border: 1px solid rgba(80, 250, 123, 0.3);
+        }
+
+        .button:nth-child(2):hover {
+            background: linear-gradient(45deg, rgba(80, 250, 123, 0.3), rgba(0, 223, 216, 0.3));
+            border: 1px solid rgba(80, 250, 123, 0.5);
+        }
+
+        /* Circle Navigation Buttons */
+        .circle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 22px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards 1s;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .circle:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .top-left { top: 30px; left: 30px; }
+        .top-right { top: 30px; right: 30px; }
+
+        /* Account Dropdown Menu */
+        .account-dropdown {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(16, 18, 27, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+            text-align: left;
+            min-width: 180px;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            visibility: hidden;
+            z-index: 20;
+        }
+
+        .account-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 25px;
+            width: 16px;
+            height: 16px;
+            background: rgba(16, 18, 27, 0.4);
+            transform: rotate(45deg);
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            border-left: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .account-dropdown a {
+            display: block;
+            padding: 14px 16px;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            margin-bottom: 6px;
+            position: relative;
+            font-weight: 500;
+            overflow: hidden;
+        }
+
+        .account-dropdown a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            width: calc(100% - 32px);
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .account-dropdown a:last-child::after {
+            display: none;
+        }
+
+        .account-dropdown a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            padding-left: 20px;
+        }
+
+        /* Show dropdown when active */
+        .account-dropdown.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(-50px, -30px); }
+            100% { transform: translate(30px, 50px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <canvas id="mesh-canvas" class="mesh-canvas"></canvas>
+    
+    <!-- Particle Container -->
+    <div class="particles-container" id="particles-container"></div>
+    
+    <!-- Glowing Orbs -->
+    <div class="glow glow-purple" style="top: 25%; left: 15%;"></div>
+    <div class="glow glow-blue" style="top: 60%; left: 70%;"></div>
+    <div class="glow glow-teal" style="top: 20%; left: 75%;"></div>
+
+    <!-- Top Left Circle (Team Details) -->
+    <div class="circle top-left">
+        <a href="{% url 'menu' %}" style="text-decoration: none; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 24px;">📋</span>
+        </a>
+    </div>
+
+    <!-- Top Right Circle (Account) -->
+    <div class="circle top-right" id="account-icon">⚙</div>
+    <div class="account-dropdown" id="dropdown-menu">
+        <a href="{% url 'profile' %}">Profile</a>
+        <a href="{% url 'team' %}">Team Info</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="container">
+        <h1>GENAI</h1>
+        <div class="button-container">
+            <a href="{% url 'voice_assistant' %}" class="button">Voice</a>
+            <a href="{% url 'chatbot' %}" class="button">Chatbot</a>
+        </div>
+    </div>
+
+    <script>
+        // Account Dropdown with Smooth Transition
+        const accountIcon = document.getElementById("account-icon");
+        const dropdownMenu = document.getElementById("dropdown-menu");
+
+        accountIcon.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("active");
+        });
+
+        // Close dropdown when clicking outside
+        document.body.addEventListener("click", (event) => {
+            if (!accountIcon.contains(event.target)) {
+                dropdownMenu.classList.remove("active");
+            }
+        });
+
+        // Particles Background Animation
+        const particlesContainer = document.getElementById('particles-container');
+        const particleCount = 50;
+
+        // Create particles
+        for (let i = 0; i < particleCount; i++) {
+            createParticle();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 8px
+            const size = Math.random() * 6 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            const xPos = Math.random() * 100;
+            const yPos = Math.random() * 100;
+            particle.style.left = `${xPos}%`;
+            particle.style.top = `${yPos}%`;
+            
+            // Random opacity
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Animation properties
+            const duration = Math.random() * 40 + 20;
+            const xMovement = Math.random() * 150 - 75;
+            const yMovement = Math.random() * 150 - 75;
+            
+            particle.style.animation = `floatAround ${duration}s infinite linear alternate`;
+            particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // Animate the glowing elements
+        const glowElements = document.querySelectorAll('.glow');
+        glowElements.forEach((glow, index) => {
+            glow.style.animation = `floatAround ${20 + index * 7}s infinite linear alternate, pulse 10s infinite ease-in-out`;
+        });
+
+        // 3D Mesh Background
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let width, height;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        resizeCanvas();
+
+        // Points for the mesh
+        const points = [];
+        const spacing = 100;
+        const rows = Math.ceil(height / spacing) + 2;
+        const cols = Math.ceil(width / spacing) + 2;
+        
+        // Create grid of points
+        for (let y = -1; y < rows; y++) {
+            for (let x = -1; x < cols; x++) {
+                points.push({
+                    x: x * spacing,
+                    y: y * spacing,
+                    originX: x * spacing,
+                    originY: y * spacing,
+                    // Random movement
+                    vx: 0,
+                    vy: 0,
+                    // Noise offsets
+                    noise: Math.random() * 1000
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update point positions
+            const time = Date.now() * 0.001;
+            
+            points.forEach(point => {
+                // Calculate noise-based movement
+                const nx = Math.sin(time * 0.2 + point.noise);
+                const ny = Math.cos(time * 0.2 + point.noise);
+                
+                // Update position with noise
+                point.x = point.originX + nx * 20;
+                point.y = point.originY + ny * 20;
+            });
+            
+            // Draw lines between points
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const currentPoint = points[i];
+                
+                // Connect horizontal lines
+                if ((i + 1) % cols !== 0) {
+                    const rightPoint = points[i + 1];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(rightPoint.x, rightPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Connect vertical lines
+                if (i + cols < points.length) {
+                    const bottomPoint = points[i + cols];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Draw points
+                if (Math.random() > 0.995) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(currentPoint.x, currentPoint.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+
+        // Smooth Loading Animation
+        window.onload = () => {
+            document.querySelectorAll('.circle, .button').forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.15 + 0.5}s`;
+                el.classList.add('fade-in');
+            });
+        };
+    </script>
+</body>
+</html>

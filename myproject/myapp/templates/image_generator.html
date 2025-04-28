@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENAI - Image Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            --accent-color: #9358f7;
+            --accent-gradient: linear-gradient(to right, #9358f7, #7c42ff);
+            --card-bg: rgba(16, 18, 27, 0.4);
+            --card-hover-bg: rgba(25, 28, 40, 0.5);
+            --text-color: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+            margin: 0;
+            background: var(--primary-gradient);
+            background-size: 400% 400%;
+            color: var(--text-color);
+            min-height: 100vh;
+            opacity: 0;
+            animation: fadeIn 0.8s forwards, gradientAnimation 15s ease infinite;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Background Gradient Effect */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: -2;
+        }
+
+        /* Mesh Background */
+        .mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        /* Glowing Elements */
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.4;
+            animation: floatAround 20s infinite linear alternate, pulse 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glow-purple {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.3), transparent 70%);
+            top: 25%;
+            left: 15%;
+        }
+
+        .glow-blue {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(64, 86, 161, 0.3), transparent 70%);
+            top: 60%;
+            left: 70%;
+        }
+
+        /* Particles Container */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Animations */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+            50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
+            100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(-50px, -30px); }
+            100% { transform: translate(30px, 50px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.4; }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 20px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1) translateX(-5px);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8em;
+            text-align: center;
+            margin-bottom: 40px;
+            animation: pulseGlow 3s infinite;
+            background: linear-gradient(to right, #fff, #a3a2f5, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 30px auto;
+            animation: fadeIn 1s forwards;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.3);
+            border-color: rgba(147, 88, 247, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s;
+            outline: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 25px rgba(147, 88, 247, 0.3);
+            border-color: rgba(147, 88, 247, 0.3);
+        }
+
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .button {
+            display: inline-block;
+            width: 100%;
+            padding: 15px 30px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(147, 88, 247, 0.3);
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(147, 88, 247, 0.4);
+        }
+
+        .button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .image-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        #loading-message {
+            display: none;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        #generated-image {
+            display: none;
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        #generated-image:hover {
+            transform: scale(1.02);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s;
+            animation: gradientAnimation 15s ease infinite;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(147, 88, 247, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <canvas id="mesh-canvas" class="mesh-canvas"></canvas>
+    
+    <!-- Particle Container -->
+    <div class="particles-container" id="particles-container"></div>
+    
+    <!-- Glowing Orbs -->
+    <div class="glow glow-purple"></div>
+    <div class="glow glow-blue"></div>
+
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <a href="{% url 'menu' %}" class="back-button">←</a>
+    
+    <h1>AI Image Generator</h1>
+    
+    <div class="container">
+        <form method="post" action="{% url 'generate_image' %}">
+            {% csrf_token %}
+            <div class="input-group">
+                <label for="prompt-input" class="input-label">Image Description</label>
+                <input type="text" id="prompt-input" name="prompt" class="input-field" placeholder="Describe the image you want to create..." required>
+            </div>
+            
+            <button type="submit" class="button" id="generate-button">Generate Image</button>
+        </form>
+
+        <div id="loading-message">
+            <div>Creating your masterpiece... Please wait</div>
+        </div>
+        
+        <div class="image-container">
+            <img id="generated-image" src="" alt="Generated Image">
+        </div>
+    </div>
+
+    <script>
+        // Wait for page to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Particles Background Animation
+            const particlesContainer = document.getElementById('particles-container');
+            const particleCount = 40;
+            
+            // Create particles
+            for (let i = 0; i < particleCount; i++) {
+                createParticle();
+            }
+            
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random size between 2px and 6px
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random position
+                const xPos = Math.random() * 100;
+                const yPos = Math.random() * 100;
+                particle.style.left = `${xPos}%`;
+                particle.style.top = `${yPos}%`;
+                
+                // Random opacity
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+                
+                // Animation properties
+                const duration = Math.random() * 40 + 20;
+                const xMovement = Math.random() * 150 - 75;
+                const yMovement = Math.random() * 150 - 75;
+                
+                particle.style.animation = `floatAround ${duration}s infinite linear alternate`;
+                particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // 3D Mesh Background
+            const canvas = document.getElementById('mesh-canvas');
+            const ctx = canvas.getContext('2d');
+            let animationFrameId;
+            let width, height;
+            
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+            
+            resizeCanvas();
+            
+            // Points for the mesh
+            const points = [];
+            const spacing = 100;
+            const rows = Math.ceil(height / spacing) + 2;
+            const cols = Math.ceil(width / spacing) + 2;
+            
+            // Create grid of points
+            for (let y = -1; y < rows; y++) {
+                for (let x = -1; x < cols; x++) {
+                    points.push({
+                        x: x * spacing,
+                        y: y * spacing,
+                        originX: x * spacing,
+                        originY: y * spacing,
+                        // Random movement
+                        vx: 0,
+                        vy: 0,
+                        // Noise offsets
+                        noise: Math.random() * 1000
+                    });
+                }
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                
+                // Update point positions
+                const time = Date.now() * 0.001;
+                
+                points.forEach(point => {
+                    // Calculate noise-based movement
+                    const nx = Math.sin(time * 0.2 + point.noise);
+                    const ny = Math.cos(time * 0.2 + point.noise);
+                    
+                    // Update position with noise
+                    point.x = point.originX + nx * 20;
+                    point.y = point.originY + ny * 20;
+                });
+                
+                // Draw lines between points
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.lineWidth = 0.5;
+                
+                for (let i = 0; i < points.length - 1; i++) {
+                    const currentPoint = points[i];
+                    
+                    // Connect horizontal lines
+                    if ((i + 1) % cols !== 0) {
+                        const rightPoint = points[i + 1];
+                        ctx.beginPath();
+                        ctx.moveTo(currentPoint.x, currentPoint.y);
+                        ctx.lineTo(rightPoint.x, rightPoint.y);
+                        ctx.stroke();
+                    }
+                    
+                    // Connect vertical lines
+                    if (i + cols < points.length) {
+                        const bottomPoint = points[i + cols];
+                        ctx.beginPath();
+                        ctx.moveTo(currentPoint.x, currentPoint.y);
+                        ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                        ctx.stroke();
+                    }
+                    
+                    // Draw points
+                    if (Math.random() > 0.995) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.beginPath();
+                        ctx.arc(currentPoint.x, currentPoint.y, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                animationFrameId = requestAnimationFrame(animate);
+            }
+            
+            // Start the animation
+            animate();
+            
+            // Simulate loading
+            setTimeout(() => {
+                const loader = document.querySelector('.loading-overlay');
+                loader.style.opacity = 0;
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 1500);
+            
+            // Form submission
+            const form = document.querySelector("form");
+            const loadingMessage = document.getElementById("loading-message");
+            const generateButton = document.getElementById("generate-button");
+            const generatedImage = document.getElementById("generated-image");
+            
+            form.onsubmit = async function(event) {
+                event.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                // Show loading message and disable button
+                loadingMessage.style.display = "block";
+                generateButton.disabled = true;
+                generatedImage.style.display = "none";
+                
+                try {
+                    const response = await fetch(this.action, {
+                        method: "POST",
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.image_url) {
+                        // Display the generated image
+                        generatedImage.src = data.image_url;
+                        generatedImage.style.display = "block";
+                    } else {
+                        // Handle error
+                        alert(data.error || "Failed to generate image. Please try again.");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred while generating the image.");
+                } finally {
+                    // Hide loading message and enable button
+                    loadingMessage.style.display = "none";
+                    generateButton.disabled = false;
+                }
+            };
+        });
+    </script>
+</body>
+</html>

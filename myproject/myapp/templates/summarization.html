@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #0f0c29;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* Background Gradient Effect */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        /* Mesh Background */
+        .mesh-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            background: rgba(16, 18, 27, 0.4);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+            width: 600px;
+            max-width: 90%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out forwards;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        /* Glowing Elements */
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.4;
+            animation: floatAround 20s infinite linear alternate, pulse 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glow-purple {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent 70%);
+            top: 25%;
+            left: 15%;
+        }
+
+        .glow-blue {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(64, 86, 161, 0.4), transparent 70%);
+            top: 60%;
+            left: 70%;
+        }
+
+        /* Heading Style */
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #a3a2f5, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 20px 0 12px;
+            font-weight: 500;
+        }
+
+        /* Textarea Styling */
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 14px;
+            resize: none;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: rgba(147, 88, 247, 0.5);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Button Styling */
+        button {
+            padding: 15px 35px;
+            font-size: 1em;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(147, 88, 247, 0.3);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(31, 38, 135, 0.2);
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+            margin-top: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.1) 20%, 
+                rgba(255, 255, 255, 0.2) 40%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                rgba(255, 255, 255, 0.2) 60%, 
+                rgba(255, 255, 255, 0.1) 80%, 
+                rgba(255, 255, 255, 0) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.8s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.3);
+            letter-spacing: 1.5px;
+            border-color: rgba(147, 88, 247, 0.5);
+        }
+
+        button:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Summary Display */
+        #summary {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            min-height: 80px;
+        }
+
+        /* Particle Effects */
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(-50px, -30px); }
+            100% { transform: translate(30px, 50px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.4; }
+        }
+
+        /* Back Button */
+        .back-button {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            backdrop-filter: blur(10px);
+            z-index: 20;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 20px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <canvas id="mesh-canvas" class="mesh-canvas"></canvas>
+    
+    <!-- Particle Container -->
+    <div class="particles-container" id="particles-container"></div>
+    
+    <!-- Glowing Orbs -->
+    <div class="glow glow-purple"></div>
+    <div class="glow glow-blue"></div>
+
+    <!-- Back Button -->
+    <a href="{% url 'menu' %}" class="back-button">←</a>
+
+    <div class="container">
+        <h2>Text Summarization</h2>
+        <textarea id="text-input" placeholder="Enter text to summarize..."></textarea><br>
+        <button onclick="summarizeText()">Summarize</button>
+        <h3>Summary</h3>
+        <div id="summary">Your summary will appear here...</div>
+    </div>
+
+    <script>
+        // Particles Background Animation
+        const particlesContainer = document.getElementById('particles-container');
+        const particleCount = 40;
+
+        // Create particles
+        for (let i = 0; i < particleCount; i++) {
+            createParticle();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 6px
+            const size = Math.random() * 4 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            const xPos = Math.random() * 100;
+            const yPos = Math.random() * 100;
+            particle.style.left = `${xPos}%`;
+            particle.style.top = `${yPos}%`;
+            
+            // Random opacity
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Animation properties
+            const duration = Math.random() * 40 + 20;
+            const xMovement = Math.random() * 150 - 75;
+            const yMovement = Math.random() * 150 - 75;
+            
+            particle.style.animation = `floatAround ${duration}s infinite linear alternate`;
+            particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // 3D Mesh Background
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let width, height;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        resizeCanvas();
+
+        // Points for the mesh
+        const points = [];
+        const spacing = 100;
+        const rows = Math.ceil(height / spacing) + 2;
+        const cols = Math.ceil(width / spacing) + 2;
+        
+        // Create grid of points
+        for (let y = -1; y < rows; y++) {
+            for (let x = -1; x < cols; x++) {
+                points.push({
+                    x: x * spacing,
+                    y: y * spacing,
+                    originX: x * spacing,
+                    originY: y * spacing,
+                    // Random movement
+                    vx: 0,
+                    vy: 0,
+                    // Noise offsets
+                    noise: Math.random() * 1000
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update point positions
+            const time = Date.now() * 0.001;
+            
+            points.forEach(point => {
+                // Calculate noise-based movement
+                const nx = Math.sin(time * 0.2 + point.noise);
+                const ny = Math.cos(time * 0.2 + point.noise);
+                
+                // Update position with noise
+                point.x = point.originX + nx * 20;
+                point.y = point.originY + ny * 20;
+            });
+            
+            // Draw lines between points
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const currentPoint = points[i];
+                
+                // Connect horizontal lines
+                if ((i + 1) % cols !== 0) {
+                    const rightPoint = points[i + 1];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(rightPoint.x, rightPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Connect vertical lines
+                if (i + cols < points.length) {
+                    const bottomPoint = points[i + cols];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Draw points
+                if (Math.random() > 0.995) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(currentPoint.x, currentPoint.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+
+        // Text summarization function
+        function getCSRFToken() {
+            const csrfCookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+            return csrfCookie ? csrfCookie.split('=')[1] : '';
+        }
+        
+        function summarizeText() {
+            const text = document.getElementById("text-input").value;
+            const summaryElement = document.getElementById("summary");
+            
+            // Show loading state
+            summaryElement.innerHTML = "Summarizing...";
+            
+            fetch("{% url 'text_summarization' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: `text=${encodeURIComponent(text)}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                summaryElement.innerHTML = data.summary;
+                // Add fade-in effect to the summary
+                summaryElement.style.animation = "fadeIn 0.5s ease-in-out forwards";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                summaryElement.innerHTML = "An error occurred while summarizing the text. Please try again.";
+            });
+        }
+    </script>
+</body>
+</html>

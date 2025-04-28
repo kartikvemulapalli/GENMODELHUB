@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Team | GenAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #0f0c29;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Gradient Effect */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            z-index: 5;
+            padding: 60px 20px;
+        }
+
+        /* Logo/Heading */
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5em;
+            background: linear-gradient(to right, #fff, #a3a2f5, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 6px;
+            margin-bottom: 60px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Mesh Canvas */
+        .mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        /* Particle Effects */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Glowing Orbs */
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.4;
+            animation: floatAround 20s infinite linear alternate, pulse 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .glow-purple {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent 70%);
+        }
+
+        .glow-blue {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(64, 86, 161, 0.4), transparent 70%);
+        }
+
+        .glow-teal {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(0, 128, 128, 0.3), transparent 70%);
+        }
+
+        /* Team and Abstract Containers */
+        .team-container, .abstract-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: left;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .team-container {
+            animation-delay: 0.3s;
+        }
+
+        .abstract-container {
+            animation-delay: 0.6s;
+        }
+
+        .team-container h2, .abstract-container h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a3a2f5;
+        }
+
+        .team-container p, .abstract-container p {
+            font-size: 1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .team-container p strong {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 22px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(-50px, -30px); }
+            100% { transform: translate(30px, 50px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.4; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 80px 20px 40px 20px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 40px;
+            }
+            
+            .team-container, .abstract-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <canvas id="mesh-canvas" class="mesh-canvas"></canvas>
+    
+    <!-- Particle Container -->
+    <div class="particles-container" id="particles-container"></div>
+    
+    <!-- Glowing Orbs -->
+    <div class="glow glow-purple" style="top: 25%; left: 15%;"></div>
+    <div class="glow glow-blue" style="top: 60%; left: 70%;"></div>
+    <div class="glow glow-teal" style="top: 20%; left: 75%;"></div>
+
+    <!-- Back Button -->
+    <a href="{% url 'dashboard' %}" class="back-button">←</a>
+
+    <div class="container">
+        <h1>MEET OUR TEAM</h1>
+        
+        <div class="team-container">
+            <h2>Team Members</h2>
+            <p><strong>K. Bhanu Teja</strong> - 21X41A4224</p>
+            <p><strong>M. Soma Sekhar</strong> - 21X41A4232</p>
+            <p><strong>V. Kartik</strong> - 21X41A4260</p>
+            <p><strong>B. Syam Sundar</strong> - 22X45A4201</p>
+        </div>
+
+        <div class="abstract-container">
+            <h2>Project Abstract</h2>
+            <p>
+                The proposed project is a Django-implemented site, designed to deliver an advanced and super-intelligent user experience. 
+                This system integrates <strong>voice assistance</strong>, an <strong>AI chatbot</strong>, and multiple <strong>generative AI features</strong> powered by cutting-edge 
+                <strong>Large Language Models (LLMs)</strong> and <strong>AI frameworks</strong>.
+            </p>
+            <p>
+                At its core, the system provides an <strong>interactive AI-powered experience</strong> that enables <strong>voice interactions</strong>, measuring input using <strong>Speech-to-Text (STT)</strong> 
+                and responding through <strong>Text-to-Speech (TTS)</strong>. Technologies such as <strong>OpenAI's Whisper, Google Speech-to-Text API, Tacotron, and ElevenLabs</strong> 
+                are used to ensure smooth, real-time conversations.
+            </p>
+            <p>
+                Additionally, the <strong>AI chatbot</strong> is built using <strong>GPT-based models (OpenAI API, Hugging Face Transformers)</strong>, providing <strong>human-like responses</strong> 
+                and handling user queries efficiently. The chatbot is architected to leverage multiple <strong>LLMs</strong> to enhance its <strong>knowledge retrieval and content generation</strong> 
+                capabilities.
+            </p>
+            <p>
+                Users can <strong>interact via voice commands, text inputs, or file uploads</strong>. The system processes these inputs using generative AI models, delivering <strong>voice 
+                responses (TTS-based)</strong> and <strong>intelligent chatbot replies</strong> to create a seamless conversational experience.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Particles Background Animation
+        const particlesContainer = document.getElementById('particles-container');
+        const particleCount = 50;
+
+        // Create particles
+        for (let i = 0; i < particleCount; i++) {
+            createParticle();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 8px
+            const size = Math.random() * 6 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            const xPos = Math.random() * 100;
+            const yPos = Math.random() * 100;
+            particle.style.left = `${xPos}%`;
+            particle.style.top = `${yPos}%`;
+            
+            // Random opacity
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Animation properties
+            const duration = Math.random() * 40 + 20;
+            const xMovement = Math.random() * 150 - 75;
+            const yMovement = Math.random() * 150 - 75;
+            
+            particle.style.animation = `floatAround ${duration}s infinite linear alternate`;
+            particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // 3D Mesh Background
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let width, height;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        resizeCanvas();
+
+        // Points for the mesh
+        const points = [];
+        const spacing = 100;
+        const rows = Math.ceil(height / spacing) + 2;
+        const cols = Math.ceil(width / spacing) + 2;
+        
+        // Create grid of points
+        for (let y = -1; y < rows; y++) {
+            for (let x = -1; x < cols; x++) {
+                points.push({
+                    x: x * spacing,
+                    y: y * spacing,
+                    originX: x * spacing,
+                    originY: y * spacing,
+                    // Random movement
+                    vx: 0,
+                    vy: 0,
+                    // Noise offsets
+                    noise: Math.random() * 1000
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update point positions
+            const time = Date.now() * 0.001;
+            
+            points.forEach(point => {
+                // Calculate noise-based movement
+                const nx = Math.sin(time * 0.2 + point.noise);
+                const ny = Math.cos(time * 0.2 + point.noise);
+                
+                // Update position with noise
+                point.x = point.originX + nx * 20;
+                point.y = point.originY + ny * 20;
+            });
+            
+            // Draw lines between points
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const currentPoint = points[i];
+                
+                // Connect horizontal lines
+                if ((i + 1) % cols !== 0) {
+                    const rightPoint = points[i + 1];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(rightPoint.x, rightPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Connect vertical lines
+                if (i + cols < points.length) {
+                    const bottomPoint = points[i + cols];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Draw points
+                if (Math.random() > 0.995) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(currentPoint.x, currentPoint.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+    </script>
+</body>
+</html>

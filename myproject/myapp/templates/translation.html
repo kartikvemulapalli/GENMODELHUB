@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Translator | GenAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #0f0c29;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Gradient Effect */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            z-index: 5;
+            padding: 40px 20px;
+        }
+
+        /* Logo/Heading */
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3em;
+            background: linear-gradient(to right, #fff, #a3a2f5, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 6px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Mesh Canvas */
+        .mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        /* Particle Effects */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Glowing Orbs */
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.4;
+            animation: floatAround 20s infinite linear alternate, pulse 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .glow-purple {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent 70%);
+        }
+
+        .glow-blue {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(64, 86, 161, 0.4), transparent 70%);
+        }
+
+        .glow-teal {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(0, 128, 128, 0.3), transparent 70%);
+        }
+
+        /* Translator Container */
+        .translator-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .translator-container h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a3a2f5;
+        }
+
+        /* Form Elements */
+        textarea, select, button {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+            font-family: 'Montserrat', sans-serif;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        textarea:focus, select:focus {
+            outline: none;
+            border-color: #a3a2f5;
+            box-shadow: 0 0 12px rgba(163, 162, 245, 0.4);
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 12px auto;
+            padding-right: 30px;
+        }
+
+        /* Fix for dropdown option text color */
+        select option {
+            background-color: #24243e;
+            color: white;
+        }
+
+        button {
+            background: linear-gradient(135deg, #a3a2f5, #6f6ee2);
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: none;
+            margin-top: 20px;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(111, 110, 226, 0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        button:hover::after {
+            left: 100%;
+        }
+
+        /* Label Styling */
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 5px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Output Area */
+        .output-area {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            min-height: 60px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .output-area h3 {
+            margin-bottom: 10px;
+            color: #a3a2f5;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        #output-text {
+            color: #f1c40f;
+            font-weight: 400;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 22px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(-50px, -30px); }
+            100% { transform: translate(30px, 50px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.4; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 80px 20px 40px 20px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+                margin-bottom: 30px;
+            }
+            
+            .translator-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <canvas id="mesh-canvas" class="mesh-canvas"></canvas>
+    
+    <!-- Particle Container -->
+    <div class="particles-container" id="particles-container"></div>
+    
+    <!-- Glowing Orbs -->
+    <div class="glow glow-purple" style="top: 25%; left: 15%;"></div>
+    <div class="glow glow-blue" style="top: 60%; left: 70%;"></div>
+    <div class="glow glow-teal" style="top: 20%; left: 75%;"></div>
+
+    <!-- Back Button -->
+    <a href="{% url 'menu' %}" class="back-button">←</a>
+
+    <div class="container">
+        <h1>AI TRANSLATOR</h1>
+        
+        <div class="translator-container">
+            <h2>Translate Text</h2>
+            
+            <label for="input-text">Enter text to translate:</label>
+            <textarea id="input-text" placeholder="Type your text here..."></textarea>
+            
+            <label for="language-select">Select target language:</label>
+            <select id="language-select">
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="nl">Dutch</option>
+            </select>
+            
+            <button id="translate-button">Translate Now</button>
+            
+            <div class="output-area">
+                <h3>Translation Result:</h3>
+                <p id="output-text">Your translation will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Particles Background Animation
+        const particlesContainer = document.getElementById('particles-container');
+        const particleCount = 50;
+
+        // Create particles
+        for (let i = 0; i < particleCount; i++) {
+            createParticle();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 8px
+            const size = Math.random() * 6 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            const xPos = Math.random() * 100;
+            const yPos = Math.random() * 100;
+            particle.style.left = `${xPos}%`;
+            particle.style.top = `${yPos}%`;
+            
+            // Random opacity
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Animation properties
+            const duration = Math.random() * 40 + 20;
+            const xMovement = Math.random() * 150 - 75;
+            const yMovement = Math.random() * 150 - 75;
+            
+            particle.style.animation = `floatAround ${duration}s infinite linear alternate`;
+            particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // 3D Mesh Background
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let width, height;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        resizeCanvas();
+
+        // Points for the mesh
+        const points = [];
+        const spacing = 100;
+        const rows = Math.ceil(height / spacing) + 2;
+        const cols = Math.ceil(width / spacing) + 2;
+        
+        // Create grid of points
+        for (let y = -1; y < rows; y++) {
+            for (let x = -1; x < cols; x++) {
+                points.push({
+                    x: x * spacing,
+                    y: y * spacing,
+                    originX: x * spacing,
+                    originY: y * spacing,
+                    // Random movement
+                    vx: 0,
+                    vy: 0,
+                    // Noise offsets
+                    noise: Math.random() * 1000
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update point positions
+            const time = Date.now() * 0.001;
+            
+            points.forEach(point => {
+                // Calculate noise-based movement
+                const nx = Math.sin(time * 0.2 + point.noise);
+                const ny = Math.cos(time * 0.2 + point.noise);
+                
+                // Update position with noise
+                point.x = point.originX + nx * 20;
+                point.y = point.originY + ny * 20;
+            });
+            
+            // Draw lines between points
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const currentPoint = points[i];
+                
+                // Connect horizontal lines
+                if ((i + 1) % cols !== 0) {
+                    const rightPoint = points[i + 1];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(rightPoint.x, rightPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Connect vertical lines
+                if (i + cols < points.length) {
+                    const bottomPoint = points[i + cols];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Draw points
+                if (Math.random() > 0.995) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(currentPoint.x, currentPoint.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+
+        // Translation functionality
+        document.getElementById("translate-button").addEventListener("click", function () {
+            const text = document.getElementById("input-text").value.trim();
+            const language = document.getElementById("language-select").value;
+            const outputText = document.getElementById("output-text");
+            
+            if (!text) {
+                outputText.innerText = "Please enter text to translate.";
+                return;
+            }
+            
+            // Add loading state
+            outputText.innerText = "Translating...";
+            
+            fetch("/translate/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    text: text,
+                    language: language,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Translation Response:", data);
+                if (data.translated_text) {
+                    outputText.innerText = data.translated_text;
+                } else {
+                    outputText.innerText = "Translation failed. Please try again.";
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                outputText.innerText = "Error: Could not complete translation request.";
+            });
+        });
+    </script>
+</body>
+</html>

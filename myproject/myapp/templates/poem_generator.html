@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poem Generator | GenAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #0f0c29;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Gradient Effect */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(125deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            z-index: 5;
+            padding: 60px 20px;
+        }
+
+        /* Logo/Heading */
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5em;
+            background: linear-gradient(to right, #fff, #a3a2f5, #fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 6px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        h3 {
+            font-size: 1.8em;
+            margin: 30px 0 15px;
+            color: #a3a2f5;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            animation-delay: 0.6s;
+        }
+
+        /* Mesh Canvas */
+        .mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        /* Particle Effects */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Glowing Orbs */
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.4;
+            animation: floatAround 20s infinite linear alternate, pulse 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .glow-purple {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent 70%);
+        }
+
+        .glow-blue {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(64, 86, 161, 0.4), transparent 70%);
+        }
+
+        .glow-teal {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(0, 128, 128, 0.3), transparent 70%);
+        }
+
+        /* Form Styling */
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+            animation-delay: 0.3s;
+        }
+
+        .output-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out forwards;
+            animation-delay: 0.6s;
+            position: relative;
+        }
+
+        /* Form Elements */
+        input {
+            width: 80%;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #a3a2f5;
+            box-shadow: 0 0 15px rgba(163, 162, 245, 0.5);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            padding: 15px 40px;
+            margin-top: 15px;
+            background: linear-gradient(45deg, #302b63, #24243e);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:disabled::before {
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            resize: none;
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Loading Animation */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(16, 13, 46, 0.85);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: #a3a2f5;
+            letter-spacing: 1px;
+        }
+        
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            margin: 0 5px;
+            border-radius: 50%;
+            background-color: #a3a2f5;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.3;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Poem Result Styling */
+        .poem-content {
+            white-space: pre-wrap;
+            text-align: left;
+            color: white;
+            font-size: 16px;
+            line-height: 1.8;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Success Animation */
+        @keyframes success-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(163, 162, 245, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(163, 162, 245, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(163, 162, 245, 0); }
+        }
+        
+        .poem-success {
+            animation: success-pulse 2s 1;
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 22px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -50px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(-50px, -30px); }
+            100% { transform: translate(30px, 50px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.4; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 80px 20px 40px 20px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 40px;
+            }
+            
+            .form-container, .output-container {
+                padding: 20px;
+            }
+            
+            input, textarea {
+                width: 100%;
+            }
+            
+            .loading-text {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-gradient"></div>
+    <canvas id="mesh-canvas" class="mesh-canvas"></canvas>
+    
+    <!-- Particle Container -->
+    <div class="particles-container" id="particles-container"></div>
+    
+    <!-- Glowing Orbs -->
+    <div class="glow glow-purple" style="top: 25%; left: 15%;"></div>
+    <div class="glow glow-blue" style="top: 60%; left: 70%;"></div>
+    <div class="glow glow-teal" style="top: 20%; left: 75%;"></div>
+
+    <!-- Back Button -->
+    <a href="{% url 'menu' %}" class="back-button">←</a>
+
+    <div class="container">
+        <h1>AI POEM GENERATOR</h1>
+        
+        <div class="form-container">
+            <form id="poemForm" method="POST">
+                {% csrf_token %}
+                <input type="text" id="theme" name="theme" placeholder="Enter a theme for your poem..." required>
+                <button type="submit" id="generateButton">Generate Poem</button>
+            </form>
+        </div>
+
+        <div class="output-container">
+            <h3 id="outputTitle">Generated Poem</h3>
+            <div id="poemOutput" class="poem-content"></div>
+            
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-text">Creating your poem</div>
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form elements
+        const poemForm = document.getElementById("poemForm");
+        const generateButton = document.getElementById("generateButton");
+        const poemOutput = document.getElementById("poemOutput");
+        const outputTitle = document.getElementById("outputTitle");
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        
+        // Form submission handler
+        poemForm.onsubmit = async function(event) {
+            event.preventDefault();
+            
+            // Get the theme and CSRF token
+            const theme = document.getElementById("theme").value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Show loading state
+            generateButton.disabled = true;
+            loadingOverlay.classList.add("active");
+            poemOutput.textContent = "";
+            poemOutput.classList.remove("poem-success");
+            
+            try {
+                // Make API request
+                const response = await fetch("/generate-poem/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": csrfToken
+                    },
+                    body: new URLSearchParams({ theme })
+                });
+                
+                const data = await response.json();
+                
+                // Short delay to show loading animation
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                // Update the output with the generated poem or error
+                if (data.poem) {
+                    poemOutput.textContent = data.poem;
+                    poemOutput.classList.add("poem-success");
+                } else {
+                    poemOutput.textContent = data.error || "An error occurred while generating your poem. Please try again.";
+                }
+            } catch (error) {
+                // Handle any errors
+                poemOutput.textContent = "An error occurred while generating your poem. Please try again.";
+                console.error("Error:", error);
+            } finally {
+                // Reset UI state regardless of success or failure
+                generateButton.disabled = false;
+                loadingOverlay.classList.remove("active");
+            }
+        };
+
+        // Particles Background Animation
+        const particlesContainer = document.getElementById('particles-container');
+        const particleCount = 50;
+
+        // Create particles
+        for (let i = 0; i < particleCount; i++) {
+            createParticle();
+        }
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random size between 2px and 8px
+            const size = Math.random() * 6 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Random position
+            const xPos = Math.random() * 100;
+            const yPos = Math.random() * 100;
+            particle.style.left = `${xPos}%`;
+            particle.style.top = `${yPos}%`;
+            
+            // Random opacity
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Animation properties
+            const duration = Math.random() * 40 + 20;
+            const xMovement = Math.random() * 150 - 75;
+            const yMovement = Math.random() * 150 - 75;
+            
+            particle.style.animation = `floatAround ${duration}s infinite linear alternate`;
+            particle.style.transform = `translate(${xMovement}px, ${yMovement}px)`;
+            
+            particlesContainer.appendChild(particle);
+        }
+
+        // 3D Mesh Background
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let width, height;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        resizeCanvas();
+
+        // Points for the mesh
+        const points = [];
+        const spacing = 100;
+        const rows = Math.ceil(height / spacing) + 2;
+        const cols = Math.ceil(width / spacing) + 2;
+        
+        // Create grid of points
+        for (let y = -1; y < rows; y++) {
+            for (let x = -1; x < cols; x++) {
+                points.push({
+                    x: x * spacing,
+                    y: y * spacing,
+                    originX: x * spacing,
+                    originY: y * spacing,
+                    // Random movement
+                    vx: 0,
+                    vy: 0,
+                    // Noise offsets
+                    noise: Math.random() * 1000
+                });
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Update point positions
+            const time = Date.now() * 0.001;
+            
+            points.forEach(point => {
+                // Calculate noise-based movement
+                const nx = Math.sin(time * 0.2 + point.noise);
+                const ny = Math.cos(time * 0.2 + point.noise);
+                
+                // Update position with noise
+                point.x = point.originX + nx * 20;
+                point.y = point.originY + ny * 20;
+            });
+            
+            // Draw lines between points
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i < points.length - 1; i++) {
+                const currentPoint = points[i];
+                
+                // Connect horizontal lines
+                if ((i + 1) % cols !== 0) {
+                    const rightPoint = points[i + 1];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(rightPoint.x, rightPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Connect vertical lines
+                if (i + cols < points.length) {
+                    const bottomPoint = points[i + cols];
+                    ctx.beginPath();
+                    ctx.moveTo(currentPoint.x, currentPoint.y);
+                    ctx.lineTo(bottomPoint.x, bottomPoint.y);
+                    ctx.stroke();
+                }
+                
+                // Draw points
+                if (Math.random() > 0.995) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(currentPoint.x, currentPoint.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // Start the animation
+        animate();
+    </script>
+</body>
+</html>
