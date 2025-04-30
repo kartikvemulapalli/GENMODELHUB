@@ -80,8 +80,8 @@ It supports **text generation, image creation, code generation, and voice intera
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/yourusername/GenModelHub.git
-cd GenModelHub
+git clone https://github.com/kartikvemulapalli/GENMODELHUB.git
+cd myproject
 
 # 2. Create a virtual environment
 python -m venv venv
