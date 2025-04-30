@@ -1,7 +1,6 @@
 # 🤖🎙️ GenModelHub 🤖🎙️
 
-**GenModelHub** is a powerful AI-powered platform that unifies state-of-the-art generative models into a single, user-friendly interface.  
-It supports **text generation, image creation, code generation, and voice interaction** — enabling seamless multimodal content generation for developers, businesses, and creatives.
+**GenModelHub** is an advanced AI-powered chatbot platform that integrates multiple state-of-the-art generative models into a single, unified interface. Built on Django's robust framework, our system combines the capabilities of LLaMA-3 for text and code generation, Stable Diffusion for image creation, and gTTS for speech synthesis, enabling seamless multimodal interactions through both voice and text inputs.The platform offers comprehensive content generation features, including conversational AI interactions, programming code synthesis, creative writing (stories and poetry), language translation, text summarization, and image generation - all accessible through a simple chat interface. For data processing tasks, we incorporate Jellyfish to ensure efficient input handling and preprocessing.
 
 [![Live Demo](https://img.shields.io/badge/Live-Visit%20GenModelHub-brightgreen?style=for-the-badge&logo=python)](https://genmodelhubgenai.pythonanywhere.com)
 
